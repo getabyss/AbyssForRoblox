@@ -1,5 +1,4 @@
 local GuiLibrary = shared.GuiLibrary
-local vape = shared.GuiLibrary -- moment
 local playersService = game:GetService("Players")
 local textService = game:GetService("TextService")
 local lightingService = game:GetService("Lighting")
@@ -21,14 +20,6 @@ local vapeEvents = setmetatable({}, {
 })
 local vapeTargetInfo = shared.VapeTargetInfo
 local vapeInjected = true
-local VERSION = "Public Beta"
-local combat = GuiLibrary.ObjectsThatCanBeSaved.CombatWindow
-local blatant = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow
-local visual = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow
-local exploit = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow
-local utility = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow
-local world = GuiLibrary.ObjectsThatCanBeSaved.WorldWindow
-
 
 local bedwars = {}
 local store = {
@@ -112,7 +103,7 @@ end
 
 local function vapeGithubRequest(scripturl)
 	if not isfile("vape/"..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/getabyss/AbyssForRoblox/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
 		assert(suc, res)
 		assert(res ~= "404: Not Found", res)
 		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -408,12 +399,28 @@ local function attackValue(vec)
 	return {value = vec}
 end
 
+local doDamageBoost = false
+local damageboosttick = tick()
+task.spawn(function()
+	table.insert(vapeConnections, lplr.CharacterAdded:Connect(function(char)
+		char:WaitForChild("Humanoid", 9e9)
+		table.insert(vapeConnections, char.Humanoid.HealthChanged:Connect(function(h)
+			if char.Humanoid.Health > h then
+				damageboosttick = tick() + 0.5
+			end
+		end))
+	end))
+end)
+
 local function getSpeed()
 	local speed = 0
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute("SpeedBoost")
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
 			speed = speed + (8 * (SpeedDamageBoost - 1))
+		end
+		if damageboosttick > tick() and doDamageBoost then
+			speed = speed + 8
 		end
 		if store.grapple > tick() then
 			speed = speed + GrappleSpeed.Value
@@ -4376,6 +4383,7 @@ run(function()
 	local SpeedMode = {Value = "CFrame"}
 	local SpeedValue = {Value = 1}
 	local SpeedValueLarge = {Value = 1}
+	local SpeedDamageBoost = {Enabled = false}
 	local SpeedJump = {Enabled = false}
 	local SpeedJumpHeight = {Value = 20}
 	local SpeedJumpAlways = {Enabled = false}
@@ -4394,6 +4402,7 @@ run(function()
 						if store.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
+						doDamageBoost = SpeedDamageBoost.Enabled			
 						if not (isnetworkowner(entityLibrary.character.HumanoidRootPart) and entityLibrary.character.Humanoid:GetState() ~= Enum.HumanoidStateType.Climbing and (not spiderActive) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled)) then return end
 						if GuiLibrary.ObjectsThatCanBeSaved.GrappleExploitOptionsButton and GuiLibrary.ObjectsThatCanBeSaved.GrappleExploitOptionsButton.Api.Enabled then return end
 						if LongJump.Enabled then return end
@@ -4453,6 +4462,10 @@ run(function()
 		Function = function(val) end,
 		Default = 23
 	})
+	SpeedDamageBoost = Speed.CreateToggle({
+		Name = "Damage Boost",
+		Function = void
+	})			
 	SpeedJump = Speed.CreateToggle({
 		Name = "AutoJump",
 		Function = function(callback)
@@ -9039,13 +9052,6 @@ task.spawn(function()
 	end
 end)
 
-
-
-
-
-
-
-
 run(function()
 	InfiniteJump = blatant.Api.CreateOptionsButton({
 		Name = "InfiniteJump",
@@ -9596,8 +9602,8 @@ run(function()
     local BringEveryone = {Enabled = false}
     local PlaceIdPicker = {Value = "Squads/5v5/Doubles/Skywars"}
     BringEveryone = exploit.Api.CreateOptionsButton({
-        Name = "InstantWin",
-        HoverText = "Brings everyone to your custom-match and instantly wins in a public game",
+        Name = "EmptyGameTP",
+        HoverText = "Bring yourself to empty game.",
         Function = function(callback)
             if callback then
                 pcall(function()
@@ -9781,6 +9787,7 @@ run(function()
         HoverText = 'Prevents you from dying.',
 		Function = function(callback)
 			if callback then
+				warningNotification('Credits', 'Credits: null', '2')																																																																																																																																																															
 				task.spawn(function()
 					repeat task.wait()
 						if entityLibrary.isAlive then
@@ -10102,7 +10109,7 @@ run(function()
 	})
 end)
 
-run(function()
+--[[run(function()
     local ScytheExploit = {Enabled = false}
     ScytheExploit = exploit.Api.CreateOptionsButton({
         Name = "accidentally disabled MOST of the float check",
@@ -10145,7 +10152,7 @@ run(function()
             end
         end
     })
-end)
+end)]]
 run(function()
     local HackerDetector = { Enabled = false }
     local refreshFrequency = { Value = 0 }
@@ -10430,7 +10437,7 @@ run(function()
         HoverText = "Auto upgrades shields w/ Adetunde kit"
     })
 end)
-run(function()
+--[[run(function()
     local bypass = exploit.Api.CreateOptionsButton({ 
         Name = "TPFastJump",
         HoverText = "Makes player jump",    
@@ -10487,8 +10494,8 @@ run(function()
         Function = function() end,
         Default = 700
     })
-end)
-run(function()
+end)]]
+--[[run(function()
 local FlyBoost = exploit.Api.CreateOptionsButton({
 Name = "BetterFly",
 HoverText = "A fly boost",
@@ -10546,7 +10553,7 @@ BoostMode = FlyBoost.CreateDropdown({
                 BoostHeight.Value = value
             end
         })
-    end)
+    end)]] -- bad code :(
 
 --[[run(function()
 	local function getfontenums()
@@ -11013,106 +11020,6 @@ run(function()
 	HealthbarGradientColor.Object.Visible = false
 end)
 
-local function getNotificationMessage(messagesList, defaultMessage, replaceTag, replaceValue)
-    local message = #messagesList > 0 and messagesList[math.random(1, #messagesList)] or defaultMessage
-    return message:gsub(replaceTag, replaceValue)
-end
-
-local function handleBedBreakEvent(bedTable, lplr, BedBreakMessage)
-    if bedTable.brokenBedTeam.id == lplr:GetAttribute("Team") then
-        warningNotification("Bed", "Your bed has been destroyed by " .. (bedTable.player.DisplayName or bedTable.player.Name) .. "! Be careful.", 7)
-    elseif bedTable.player.UserId == lplr.UserId then
-        local team = bedwars.QueueMeta[bedwarsStore.queueType].teams[tonumber(bedTable.brokenBedTeam.id)]
-        local teamname = team and team.displayName:lower() or "unknown"
-        local message = getNotificationMessage({}, "You have destroyed <bed>'s bed", "<bed>", teamname)
-        Action("EventNotifier", message, 7)
-    end
-end
-
-local function handleEntityDeathEvent(deathTable, lplr, DeathMessage, FinalKillMessage)
-    local killer = playersService:GetPlayerFromCharacter(deathTable.fromEntity)
-    local killed = playersService:GetPlayerFromCharacter(deathTable.entityInstance)
-    
-    if not killed or not killer then return end
-    
-    if deathTable.finalKill then
-        if killed == lplr and killer ~= lplr then
-            local message = getNotificationMessage({}, "You have lost to <name>. Good game.", "<name>", killer.DisplayName)
-            warningNotification("EventNotifier", message, 7)
-        elseif killer == lplr then
-            local message = getNotificationMessage({}, "You've defeated <name>!", "<name>", killed.DisplayName)
-            warningNotification("EventNotifier", message, 7)
-        end
-    else
-        if deathTable.fromEntity == lplr.Character and deathTable.entityInstance ~= lplr.Character then
-            local message = getNotificationMessage({}, "You have killed <name>.", "<name>", killed.DisplayName)
-            warningNotification("EventNotifier", message, 7)
-        end
-    end
-end
-
-local function handleMatchEndEvent(winstuff, lplr)
-    local myTeam = bedwars.ClientStoreHandler:getState().Game.myTeam
-    if myTeam and myTeam.id == winstuff.winningTeamId then
-        InfoNotification("EventNotifier", "You've won the game! gg", 60)
-    end
-end
-
-local function handleBedShieldEndEvent()
-    warningNotification("EventNotifier", "Bed shields are down.", 7)
-end
-
-local function initializeNotifications(notifications, lplr)
-    notifications = utility.Api.CreateOptionsButton({ -- thank you salad
-        Name = "EventNotifier",
-        Function = function(notified)
-            if notified then
-                task.spawn(function()
-                    table.insert(notifications.Connections, vapeEvents.BedwarsBedBreak.Event:Connect(function(bedTable)
-                        handleBedBreakEvent(bedTable, lplr)
-                    end))
-
-                    table.insert(notifications.Connections, vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
-                        handleEntityDeathEvent(deathTable, lplr)
-                    end))
-                    
-                    table.insert(notifications.Connections, vapeEvents.MatchEndEvent.Event:Connect(function(winstuff)
-                        handleMatchEndEvent(winstuff, lplr)
-                    end))
-
-                    table.insert(notifications.Connections, vapeEvents.BedShieldsEnd.Event:Connect(handleBedShieldEndEvent))
-                end)
-            end
-        end,
-        HoverText = "This module will notify you on specific events\ni looked at voidware's code for some lines of code\nso credits to Blanked Void",
-		ExtraText = function() return "UselessModule" end
-    })
-
-    local toggles = {
-        {"Final Kill Notifier", "Notifies you when you final kill someone (he wont be able to respawn)"},
-        {"No Bed Notifier", "Notifies you when your bed gets destroyed by someone"},
-        {"Player Death Notifier", "Notifies you when you pass away (with cheats lmao)"},
-        {"Bed Destroyer Notifier", "Notifies when you destroy a team's bed."},
-        {"Kills Notifier", "Notifies when you kill someone."},
-        {"Game Won Notifier", "Notifies you when you win the game."},
-        {"End Of Bed Protection", "Notifies you when bed shields end."}
-    }
-
-    for _, toggle in ipairs(toggles) do
-        notifications.CreateToggle({
-            Name = toggle[1],
-            Function = function() end,
-            Default = true,
-            HoverText = toggle[2]
-        })
-    end
-end
-
-run(function()
-    local lplr = game.Players.LocalPlayer 
-    local notifications = {Connections = {}}
-    initializeNotifications(notifications, lplr)
-end)
 --[[run(function()
   local fuckyoustav = exploit.Api.CreateOptionsButton({
     Name = "LagbackReplacer",
@@ -11285,7 +11192,7 @@ run(function()
     })
 end)
 
-run(function()
+--[[run(function()
 	local KaidaInstaKill = {Enabled = false}
 	local Range = {Value = 40}
 	local MaxEntities = {Value = 1}
@@ -11342,7 +11249,7 @@ run(function()
 		HoverText = "Max entities to attack \n at the same time"
 	})
 end)
-
+--]] -- shit
 
 
 run(function()
@@ -11358,6 +11265,7 @@ run(function()
         "Fright!";
         "Spine Chill!";
         "Pumpkin Smash!";
+	"Bloody Hell!";																																																																																																																																																																																																																													
     }
     local IndicatorColor = {
         Color3.new(1, 0.549, 0);
@@ -11386,15 +11294,15 @@ run(function()
         end
     })
 end)
-local anchorchar = function(bool)
+--[[local anchorchar = function(bool)
     for i, v in pairs(players:GetPlayers()) do
         if v ~= lplr and isAlive(v) then
             v.Character.PrimaryPart.Anchored = bool
         end
     end
-end
+end--]]
 
-run(function()
+--[[run(function()
     local BackTrack = {}
     BackTrack = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
         Name = "BackTrack",
@@ -11416,7 +11324,7 @@ run(function()
             end
         end
     })
-end)
+end)]]
 
 run(function()
 	local TweenService = game:GetService("TweenService")
@@ -12039,8 +11947,8 @@ run(function()
     local teammodes
     local lolfuni = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
         Name = 'Custom Match TeamSwitcher',
-        Function = function(call)
-            if call then
+        Function = function(calling)
+            if calling then
                 if teammodes.Value == 'Blue' then
                     local args = {
                         [1] = tostring(game.JobId),
@@ -12185,7 +12093,7 @@ run(function()
 			    end
 			})
 		end)
-run(function()
+--[[run(function()
     local bedwarsontop = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
         Name = 'FlyBypass',
         Function = function(call)
@@ -12204,7 +12112,7 @@ run(function()
         end
     })
 end)
-
+--]]
 run(function()
 	local teleporting = false
 
@@ -12415,6 +12323,7 @@ run(function()
         HoverText = 'Notifies you when an item has been\nfound in your inventory',
 		Function = function(callback)
 			if callback then
+				warningNotification('Credits', 'Credits: null', '2')																																																																																																																																																																																																																																																												
 				task.spawn(function()
 					repeat task.wait() until (getItemNear(ItemNotifierItem.Value) and entityLibrary.isAlive) or (not ItemNotifier.Enabled)
 					if getItemNear(ItemNotifierItem.Value) and entityLibrary.isAlive then
@@ -12462,6 +12371,7 @@ run(function()
         HoverText = 'Detects when you lagback',
 		Function = function(callback)
 			if callback then
+				warningNotification('Credits', 'Credits: null', '2')																																																																																																																																																																																																																																																													
 				task.spawn(function()
 					sendlagback, sendlagback2 = true, false
 					repeat task.wait()
@@ -12498,6 +12408,9 @@ run(function()
 		Default = 5
 	})
 end)
+task.spawn(function()
+	repeat task.wait() until shared.vapewhitelist.loaded
+	if shared.vapewhitelist:get(game:GetService("Players").LocalPlayer) < 1 then return end																																																																																																																																																																																																																																																																	
 run(function()
   local abilityexploit = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
     Name = "AbilityExploit",
