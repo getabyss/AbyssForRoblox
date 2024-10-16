@@ -1,4 +1,5 @@
---This watermark is used to delete the file if its cached, remove it to make the file persist after commits.
+local GuiLibrary = shared.GuiLibrary
+
 local GetEnumItems = function() return {} end
 	GetEnumItems = function(enum)
 		local fonts = {}
@@ -6,8 +7,8 @@ local GetEnumItems = function() return {} end
 			table.insert(fonts, v.Name) 
 		end
 		return fonts
-	end
-local GuiLibrary = shared.GuiLibrary
+end
+
 local playersService = game:GetService("Players")
 local coreGui = game:GetService("CoreGui")
 local textService = game:GetService("TextService")
@@ -60,7 +61,7 @@ end
 
 local function vapeGithubRequest(scripturl)
 	if not isfile("vape/"..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/getabyss/AbyssForRoblox/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
 		assert(suc, res)
 		assert(res ~= "404: Not Found", res)
 		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -498,11 +499,11 @@ run(function()
 
 	function whitelist:check(first)
 		local whitelistloaded, err = pcall(function()
-			local _, subbed = pcall(function() return game:HttpGet('https://github.com/starsdotspace/whitelists') end)
+			local _, subbed = pcall(function() return game:HttpGet('https://github.com/getabyss/whitelists') end)
 			local commit = subbed:find('spoofed_commit_check')
 			commit = commit and subbed:sub(commit + 21, commit + 60) or nil
 			commit = commit and #commit == 40 and commit or 'main'
-			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/starsdotspace/whitelists/'..commit..'/PlayerWhitelist.json', true)
+			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/getabyss/whitelists/'..commit..'/PlayerWhitelist.json', true)
 		end)
 		if not whitelistloaded or not sha or not whitelist.get then return true end
 		whitelist.loaded = true
